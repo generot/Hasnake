@@ -1,2 +1,2 @@
 func (x : xs) = x * y + func xs
-	where y = 123 / func 4
+	where [ y = 123 / func 4 ]

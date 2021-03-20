@@ -1,4 +1,4 @@
-from src.lexer import Tokenize
+from src.lexer import *
 import sys
 
 #DEFINITIONS
@@ -11,8 +11,8 @@ def entry():
         return EXIT_FAILURE
 
     with open(sys.argv[1], "r") as f:
-        tokens = Tokenize(f)
-        print(tokens)
+        tokens = LexFile(f)
+        PrintTokens(tokens)
 
     return EXIT_SUCCESS
 

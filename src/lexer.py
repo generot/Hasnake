@@ -1,5 +1,5 @@
 import re
-from tokens import *
+from src.tokens import *
 
 #----GLOBALS----#
 reg = r"\w+|[^\s\w]?[\=\!]|\<?\-|\.{1,2}|[+\/*()|:\[\]\,\>]|\".*?\""
