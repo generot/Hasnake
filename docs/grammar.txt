@@ -1,0 +1,24 @@
+func arg1 arg2 = arg1 + arg2
+
+<global> ::= { <func> } { <expr> }
+<func> ::= <ident> { <ident> } <assign> <where?>
+<assign> ::= "=" <expr> | { <guards> }
+<guards> ::= "|" <expr> <assign>
+<expr> ::= <term> | <immutable_literal>
+<term> ::= <factor> ("+"|"-") <factor> | <mutable_literal> "+" <mutable_literal>
+<factor> ::= <exp> ("*"|"/") <exp>
+<exp> ::= <value> "^" <value>
+<value> ::= <number> | <function_call>
+<function_call> ::= <ident> { <expr> }
+<mutable_literal> ::= <string> | <list>
+<immutable_literal> ::= <tuple>
+<string> ::= ".*"(everything in between two quotation marks)
+<list> ::= "[" <sequence> | <comprehension> | <range> "]"
+<sequence> ::= <expr> {"," <expr>}
+<comprehension> ::= <expr> "|" <assign2> {, <assign2> }
+<assign2> ::= <ident> "<-" <range>
+<range> ::= <expr> ".." <expr>
+<tuple> "(" <expr> {"," <expr> } ")"
+<where> ::= "[" { <func> } "]"
+<ident> ::= [a-zA-Z0-9]+
+<number> ::= [0-9]+
