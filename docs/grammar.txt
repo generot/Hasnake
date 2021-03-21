@@ -1,10 +1,11 @@
-func arg1 arg2 = arg1 + arg2
-
 <global> ::= { <func> } { <expr> }
-<func> ::= <ident> { <ident> } <assign> <where?>
+<func> ::= <arg> { <arg> } <assign> <where?>
+<arg> ::= <ident> | <head>
+<head> ::= "(" <ident> ":" <ident> ")"
 <assign> ::= "=" <expr> | { <guards> }
 <guards> ::= "|" <expr> <assign>
-<expr> ::= <term> | <immutable_literal>
+<expr> ::= <logical> | <immutable_literal>
+<logical> ::= <term> ("&&"|"||"|"<="|">="|">"|"<"|"=="|"!=") <term>
 <term> ::= <factor> ("+"|"-") <factor> | <mutable_literal> "+" <mutable_literal>
 <factor> ::= <exp> ("*"|"/") <exp>
 <exp> ::= <value> "^" <value>
