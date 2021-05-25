@@ -119,13 +119,13 @@ def Expression():
 
 def Term():
     lbr, rbr = Factor(), None
-    oper = it.get()
+    oper = token.get()
 
-    if oper == '+' or oper == '-':
-        if oper == '+':
+    if CheckToken(token, TokenType.ADD, TokenType.SUB):
+        if CheckToken(token, TokenType.ADD):
             it.next()
 
-        rbr = term()
+        rbr = Term()
         return ValExprNode(NodeType.Operation, 0, Operation.Add, lbr, rbr)
 
     return lbr
@@ -136,7 +136,7 @@ def Factor():
 
     if CheckToken(token, TokenType.MULT, TokenType.DIV):
         token.next()
-        rbr = factor()
+        rbr = Factor()
         return ValExprNode(NodeType.Operation, 0, Operation(oper), lbr, rbr)
 
     return lbr
