@@ -1,4 +1,6 @@
 from src.lexer import *
+from src.parser import *
+
 import sys
 
 #DEFINITIONS

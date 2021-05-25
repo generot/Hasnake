@@ -1,25 +1,32 @@
 <global> ::= { <func> } { <expr> }
+<import> ::= "import" <string>
+<pattern> ::= <expr> { <expr> } <assign> <where?>
 <func> ::= <arg> { <arg> } <assign> <where?>
-<arg> ::= <ident> | <head>
-<head> ::= "(" <ident> ":" <ident> ")"
+<arg> ::= <ident> | "(" <head> ")"
+<head> ::= <ident> ":" <ident>
 <assign> ::= "=" <expr> | { <guards> }
 <guards> ::= "|" <expr> <assign>
-<expr> ::= <logical> | <immutable_literal>
-<logical> ::= <term> ("&&"|"||"|"<="|">="|">"|"<"|"=="|"!=") <term>
+<expr> ::= <and_or> | <term> | <tuple> | <mutable_literal> | <if_then_else> | <IO>
+<IO> ::= <putchar> | <getchar>
+<putchar> ::= "putchar" <expr>
+<getchar> ::= "getchar"
+<if_then_else> ::= "if" <expr> "then" <expr> "else" <expr>
+<and_or> ::= <comparison> ("&&"|"||") <comparison>
+<comparison> ::= <term> ("<="|">="|">"|"<"|"=="|"!=") <term>
 <term> ::= <factor> ("+"|"-") <factor> | <mutable_literal> "+" <mutable_literal>
 <factor> ::= <exp> ("*"|"/") <exp>
 <exp> ::= <value> "^" <value>
 <value> ::= <number> | <function_call>
 <function_call> ::= <ident> { <expr> }
 <mutable_literal> ::= <string> | <list>
-<immutable_literal> ::= <tuple>
 <string> ::= ".*"(everything in between two quotation marks)
-<list> ::= "[" <sequence> | <comprehension> | <range> "]"
+<list> ::= "[" <sequence> | <comprehension> | <range> "]" | <chain>
+<chain> ::= <expr> { ":" <expr> } ":" <list>
 <sequence> ::= <expr> {"," <expr>}
 <comprehension> ::= <expr> "|" <assign2> {, <assign2> }
 <assign2> ::= <ident> "<-" <range>
 <range> ::= <expr> ".." <expr>
-<tuple> "(" <expr> {"," <expr> } ")"
+<tuple> ::= "(" <expr> {"," <expr> } ")"
 <where> ::= "[" { <func> } "]"
 <ident> ::= [a-zA-Z0-9]+
 <number> ::= [0-9]+
