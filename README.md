@@ -1,4 +1,4 @@
-# Hasnake
+# Hλsnake
 ![logo](https://repository-images.githubusercontent.com/349798787/da66a280-89d9-11eb-8e54-3f066a9d5d28)
 
 Hasnake is a pure-impure functional scripting language based on Haskell, implemented in Python. It supports and even builds on top of the already existing Standard Haskell base syntax. It serves as my second semester "Scripting languages" project.
