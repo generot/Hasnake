@@ -10,6 +10,11 @@ class operation(Enum):
     MULT = '*'
     DIV = '/'
     POW = '^'
+    AND = "&&"
+    OR = "||"
+    GT = ">"
+    LT = "<"
+    EQ = "=="
 
 class expr_type(Enum):
     VALUE = 0
@@ -23,6 +28,28 @@ class expr:
 
         self.lbr = lbr
         self.rbr = rbr
+
+def logical():
+    lbr, rbr = _cmp(), None
+    oper = it.get()
+
+    if oper == "&&" or oper == "||":
+        it.next()
+        rbr = logical()
+        return expr(expr_type.OPERATION, 0, operation(oper), lbr, rbr)
+
+    return lbr
+
+def _cmp():
+    lbr, rbr = term(), None
+    oper = it.get()
+
+    if oper == "<" or oper == ">" or oper == "==":
+        it.next()
+        rbr = _cmp()
+        return expr(expr_type.OPERATION, 0, operation(oper), lbr, rbr)
+
+    return lbr
 
 def term():
     lbr, rbr = factor(), None
@@ -105,7 +132,7 @@ def print_tree(exprtree):
         return exprtree.val if not isinstance(exprtree.val, expr) else print_tree(exprtree.val)
 
 def tokenize(inp):
-    return findall(r"\w+|[+*\-\(\)\/\^]", inp)
+    return findall(r"\w+|[|&=]{2}|[+*\-\(\)\/\^<>]", inp)
 
 def main():
     tokens = tokenize(input())
@@ -114,5 +141,5 @@ def main():
     global it
     it = Iterator(tokens)
 
-    tree = term()
+    tree = logical()
     print(print_tree(tree))

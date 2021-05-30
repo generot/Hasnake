@@ -4,7 +4,6 @@ class FunctionNode:
         self.args = args                #[String]
         self.body = body                #BodyNode
         self.context = context          #Dict<String, FunctionNode>
-        self.parentCont = parCont       #Dict<String, FunctionNode>
         self.patterns = patterns        #FunctionNode
 
 class PatternNode:
@@ -14,8 +13,8 @@ class PatternNode:
         self.body = body                #BodyNode
 
 class IONode:
-    def __init__(self, IOTp, param = None):
-        self.IOTp = IOTp                #IOType
+    def __init__(self, _IOtp, param = None):
+        self._IOtp = _IOtp              #IOType
         self.param = param              #ExpressionNode
 
 class BodyNode:
@@ -30,12 +29,25 @@ class GuardNode:
         self.asgExpr = asgExpr          #ExpressionNode
 
 class ExpressionNode:
-    def __init__(self, valexpr, _tuple, mutable, ifThenElse, IO):
+    def __init__(self, _type, valexpr, _tuple, mutable, ifThenElse, IO, chain = None):
+        self.exprType = _type           #ExpressionType
         self.valexpr = valexpr          #ValExprNode
-        self._tuple = _tuple            #TupleNode
+        self._tuple = _tuple            #Tuple
         self.mutable = mutable          #MutableNode
         self.ifThenElse = ifThenElse    #ConditionalNode
         self.IO = IO                    #IONode
+        self.chain = chain              #ChainNode
+
+class ChainNode:
+    def __init__(self, expr, nextNode):
+        self.expr = expr                #ExpressionNode
+        self.nextNode = nextNode        #ExpressionNode<Evaluates to Chain>
+
+#Only to be used in list comprehension, nowhere else.
+class Assign2Node:
+    def __init__(self, ident, ls):
+        self.ident = ident              #String
+        self.ls = ls                    #ListNode
 
 class ValExprNode:
     def __init__(self, node_type, val, op = None, lBranch = None, rBranch = None):
@@ -56,10 +68,6 @@ class ConditionalNode:
         self.boolExpr = boolExpr        #ExpressionNode
         self.thenExpr = thenExpr        #ExpressionNode
         self.elseExpr = elseExpr        #ExpressionNode
-
-class TupleNode:
-    def __init__(self, members):
-        self.members = members          #List<ExpressionNode>
 
 class MutableNode:
     def __init__(self, mutype, string = "", ls = []):
