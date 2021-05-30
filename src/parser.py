@@ -369,7 +369,7 @@ def Value():
     ntype = NodeType.Value
 
     if CheckToken(token, TokenType.VALUE):
-        val = int(token.get())
+        val = float(token.get())
         token.next()
     elif CheckToken(token, TokenType.IDENT):
         ntype = NodeType.FunctionCall

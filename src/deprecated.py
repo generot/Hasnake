@@ -21,6 +21,10 @@ def LexSetup():
     rulesSrc.close()
     return GenerateRule(allRules)
 
+
+#reg = r"\w+|[^\s\w]?[\=\!]|\<?\-|\.{1,2}|[+\/*()|:\[\]\,\>]|\".*?\""
+#reg = r"\w+|[^\s\w]?[\=\!]|\<?\-|\.{1,2}|[|&]+|[+\/*():\[\]\,\>\<]|\".*?\""
+
 #Should be called only once
 #reg = LexSetup()
 
