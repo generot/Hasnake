@@ -21,12 +21,11 @@ class MutableType(Enum):
     String = 1
 
 class ExpressionType(Enum):
-    ValExpr = "valexpr"
-    Tuple = "_tuple"
-    Mutable = "mutable"
-    Conditional = "ifThenElse"
-    IO = "IO"
-    Chain = "chain"
+    Logical = 0
+    Tuple = 1
+    Mutable = 2
+    Conditional = 3
+    Chain = 4
 
 class Operation(Enum):
     Add = '+'
@@ -77,6 +76,9 @@ class BetterIterator:
         self.len = len(ls)
         self.ix = 0
 
+    def __neq__(self, ttype):
+        return self.ls[self.ix].token_type != ttype
+
     def concat(self, otherLs):
         for i in otherLs:
             self.ls.append(i)
@@ -89,7 +91,7 @@ class BetterIterator:
 
     def lookahead(self, pos):
         if self.ix + pos < self.len:
-            return self.ls[self.ix + self.pos]
+            return self.ls[self.ix + pos]
         
         return None
 
@@ -99,10 +101,20 @@ class BetterIterator:
 
         return None
 
+def GetFirstRs(*funcs):
+    for i in funcs:
+        res = i()
+        if res:
+            return (res, i.__name__)
+
+    return None
 
 def CheckToken(itr, *args):
+    if not itr.get():
+        return False
+
     for i in args:
-        if itr.get() == i:
+        if itr.get().token_type == i:
             return True
 
     return False

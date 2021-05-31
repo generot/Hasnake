@@ -16,11 +16,7 @@ def Statement(parentContext):
         if not CheckToken(token, TokenType.LITERAL):
             raise ParseError("Expected string literal after 'import'.")
 
-        moduleContext = ImportModule(token.get().replace("\"", ""))
-
-        for symbol in moduleContext.values():
-            parentContext[symbol.ident] = symbol
-
+        ImportModule(token.get().replace("\"", ""))
         token.next()
 
     elif CheckToken(token, TokenType.IDENT):
@@ -29,16 +25,18 @@ def Statement(parentContext):
             parentContext[newSymbol.ident] = newSymbol
 
 def Function(parentContext):
-    funcIdent = token.get()
+    funcIdent = token.get().strrep
     funcArgs = []
 
     token.next()
 
     while CheckToken(token, TokenType.IDENT, TokenType.LPAR):
-        Destructure(funcArgs)
-        funcArgs.append(token.get())
+        if not Destructure(funcArgs):
+            funcArgs.append(token.get().strrep)
+            token.next()
 
-        token.next()
+    if not CheckToken(token, TokenType.ASG, TokenType.GUARD):
+        raise ParseError(f"Expected function declaration, got {token.get().token_type} instead.")
 
     localContext = {x: None for x in funcArgs}
     localContext["@global@"] = parentContext
@@ -55,14 +53,14 @@ def Destructure(args):
         token.next()
 
         if CheckToken(token, TokenType.IDENT):
-            dTuple += (token.get(), )
+            dTuple += (token.get().strrep, )
             token.next()
 
         while CheckToken(token, TokenType.SPLIT):
             token.next()
 
             if CheckToken(token, TokenType.IDENT):
-                dTuple += (token.get(), )
+                dTuple += (token.get().strrep, )
                 token.next()
             else:
                 raise ParseError("Expected identifier when destructuring, got '{token.get()}' instead.")
@@ -72,7 +70,10 @@ def Destructure(args):
 
         token.next()
 
-    args.append(dTuple)
+        args.append(dTuple)
+        return True
+
+    return False
 
 def WhereContext(parentContext):
     if not CheckToken(token, TokenType.WHERE):
@@ -84,7 +85,8 @@ def WhereContext(parentContext):
 
     token.next()
     while not CheckToken(token, TokenType.RBPAR):
-        Function(parentContext)
+       func =  Function(parentContext)
+       parentContext[func.ident] = func
 
     token.next()
     return True
@@ -92,12 +94,12 @@ def WhereContext(parentContext):
 def Pattern(parentIdent):
     args, patterns, body = [], [], None
 
-    while CheckToken(token, TokenType.IDENT) and token.strrep == parentIdent:
+    while CheckToken(token, TokenType.IDENT) and token.get().strrep == parentIdent:
         token.next()
         while not CheckToken(token, TokenType.ASG):
-            args.append(Expression(None))
+            args.append(Expression())
 
-        body = Body(None)
+        body = Body()
         patterns.append(PatternNode(parentIdent, args, body))
 
     return patterns
@@ -112,13 +114,20 @@ def Body():
             guards.append(Guard())
 
     elif CheckToken(token, TokenType.ASG):
+        token.next()
         expr = Expression()
 
     return BodyNode(guarded, expr, guards)
 
 
 def Guard():
-    boolExpr = Expression()
+    isOther = CheckToken(token, TokenType.OTHERWISE)
+    boolExpr = None
+
+    if not isOther:
+        boolExpr = Expression()
+    else:
+        token.next()
 
     if not CheckToken(token, TokenType.ASG):
         raise ParseError("Expected '=' in guards")
@@ -126,59 +135,58 @@ def Guard():
     token.next()
     asgExpr = Expression()
 
-    return GuardNode(boolExpr, asgExpr)
+    return GuardNode(boolExpr, asgExpr, isOther)
 
 def Expression():
-    exprType = None
-    dc = {
-        "chain": Chain()
-        "_tuple": Tuple()
-        "valexpr": Logical()
-        "mutable": Mutable()
-        "ifThenElse": Conditional()
-        "IO": InputOutput()
-    }
-
-    for i in dc:
-        if dc[i]:
-            exprType = ExpressionType(i)
-            return ExpressionNode(exprType, **dc)
+    expr = GetFirstRs(Tuple, Logical, Chain)
+    if expr:
+        return ExpressionNode(ExpressionType[expr[1]], expr[0])
 
     return None
 
 def Chain():
-    currIx = token.ix
-    expr = Expression()
+    baseChain = None
 
-    if CheckToken(token, TokenType.SPLIT):
-        nextNode = Expression()
-        return ChainNode(expr, nextNode)
+    if CheckToken(token, TokenType.LT):
+        token.next()
+        expr = Expression()
     
-    token.ix = currIx
-    return None
+        if CheckToken(token, TokenType.SPLIT):
+            baseChain = ChainNode(expr, None)
+            chain = baseChain
+
+            while not CheckToken(token, TokenType.GT):
+                token.next()
+                chain.nextNode = ChainNode(Expression(), None)
+                chain = chain.nextNode
+
+            if not CheckToken(token, TokenType.GT):
+                raise ParseError("Expected '>' in chain, got {token.get().token_type} instead.")
+
+            token.next()
+
+    return baseChain
 
 def Tuple():
     if CheckToken(token, TokenType.LPAR):
-        lookIx = 2
-        isTuple = False
+        currIx = token.ix
+        token.next()
 
-        while (currToken := token.lookahead(lookIx)) != TokenType.RPAR:
-            if currToken == TokenType.COMMA:
-                isTuple = True
-                break
+        accumulatedTuple = ()
+        accumulatedTuple += (Expression(), )
 
-        if isTuple:
-            token.next()
-
-            accumulatedTuple = ()
-            accumulatedTuple += (Expression(), )
-
+        if not CheckToken(token, TokenType.COMMA):
+            token.ix = currIx
+            return None
+        else:
             while not CheckToken(token, TokenType.RPAR):
-                if not CheckToken(token, TokenType.COMMA):
-                    raise ParseError(f"Expected comma in tuple definition, got '{token.get()}' instead.")
                 token.next()
                 accumulatedTuple += (Expression(), )
+
+            if not CheckToken(token, TokenType.RPAR):
+                raise ParseError(f"Expected ')', got {token.get().token_type} instead")
         
+            token.next()
             return accumulatedTuple
 
     return None
@@ -191,7 +199,7 @@ def Mutable():
             mutableType = String
 
             token.next()
-            string = token.get()
+            string = token.get().strrep
             token.next()
         elif CheckToken(token, TokenType.LBPAR):
             mutableType = List
@@ -236,7 +244,7 @@ def List():
             symbols[sym.ident] = sym
 
     if not CheckToken(token, TokenType.RBPAR):
-        raise ParseError(f"Expected list, got '${token.get()}' instead."
+        raise ParseError(f"Expected list, got '${token.get()}' instead.")
 
     token.next()
     return ListNode(lsType, seq, rng, compr)
@@ -245,7 +253,7 @@ def Assign2():
     if not CheckToken(token, TokenType.IDENT):
         raise ParseError(f"Expected identifier in comprehension, got '{token.get()}' instead.")
 
-    ident = token.get()
+    ident = token.get().strrep
     token.next()
 
     if not CheckToken(token, TokenType.ASG2):
@@ -287,26 +295,33 @@ def InputOutput():
             _type = IOType.Stdout
             _param = Expression()
 
-        return IONode(_type, param)
+        token.next()
+        return IONode(_type, _param)
 
     return None
 
 
 def Logical():
     lbr, rbr = Comparison(), None
-    oper = token.get()
+    oper = None
+
+    if token.get():
+        oper = token.get().token_type
 
     if CheckToken(token, TokenType.AND, TokenType.OR):
         token.next()
         rbr = Logical()
 
-        return ValExprNode(NodeType.Operation, 0, Operation(oper), lbr, rbr)
+        return ValExprNode(NodeType.Operation, 0, oper, lbr, rbr)
 
     return lbr
 
 def Comparison():
     lbr, rbr = Term(), None
-    oper = token.get()
+    oper = None
+
+    if token.get():
+        oper = token.get().token_type
 
     comps = [TokenType(x) for x in ["==", "/=", "<=", ">=", "<", ">"]]
 
@@ -314,53 +329,65 @@ def Comparison():
         token.next()
         rbr = Comparison()
 
-        return ValExprNode(NodeType.Operation, 0, Operation(oper), lbr, rbr)
+        return ValExprNode(NodeType.Operation, 0, oper, lbr, rbr)
 
     return lbr
 
 def Term():
     lbr, rbr = Factor(), None
-    oper = token.get()
+    oper = None
+
+    if token.get():
+        oper = token.get().token_type
 
     if CheckToken(token, TokenType.ADD, TokenType.SUB):
         if CheckToken(token, TokenType.ADD):
-            it.next()
+            token.next()
 
         rbr = Term()
-        return ValExprNode(NodeType.Operation, 0, Operation.Add, lbr, rbr)
+        return ValExprNode(NodeType.Operation, 0, TokenType.ADD, lbr, rbr)
 
     return lbr
 
 def Factor():
     lbr, rbr = Negate(), None
-    oper = token.get()
+    oper = None
+
+    if token.get():
+        oper = token.get().token_type
 
     if CheckToken(token, TokenType.MULT, TokenType.DIV):
         token.next()
         rbr = Factor()
-        return ValExprNode(NodeType.Operation, 0, Operation(oper), lbr, rbr)
+        return ValExprNode(NodeType.Operation, 0, oper, lbr, rbr)
 
     return lbr
 
 def Negate():
-    oper = token.get()
+    oper = None
+
+    if token.get():
+        oper = token.get().token_type
 
     if CheckToken(token, TokenType.SUB):
         token.next()
         lbr = Negate()
-        return ValExprNode(NodeType.Operation, 0, Operation(oper), lbr, None)
+        return ValExprNode(NodeType.Operation, 0, oper, lbr, None)
 
     return Power()
 
 
 def Power():
     lbr, rbr = Value(), None
-    oper = token.get()
+    oper = None
+
+    if token.get():
+        oper = token.get().token_type
 
     if CheckToken(token, TokenType.POW):
         token.next()
         rbr = Power()
-        return ValExprNode(NodeType.Operation, 0, Operation(oper), lbr, rbr)
+        return ValExprNode(NodeType.Operation, 0, oper, lbr, rbr)
 
     return lbr
 
@@ -369,15 +396,14 @@ def Value():
     ntype = NodeType.Value
 
     if CheckToken(token, TokenType.VALUE):
-        val = float(token.get())
+        val = float(token.get().strrep)
         token.next()
+
     elif CheckToken(token, TokenType.IDENT):
         ntype = NodeType.FunctionCall
         val = Call()
-        token.next()
 
-
-    if CheckToken(token, TokenType.LPAR):
+    elif CheckToken(token, TokenType.LPAR):
         token.next()
         val = Term()
         if not CheckToken(token, TokenType.RPAR):
@@ -388,13 +414,17 @@ def Value():
     return ValExprNode(ntype, val)
 
 def Call():
-    ident, args = token.get(), []
+    ident, args = token.get().strrep, []
 
     token.next()
     if CheckToken(token, TokenType.LPAR):
         token.next()
-        while CheckToken(token, TokenType.RPAR):
+        while not CheckToken(token, TokenType.RPAR):
             args.append(Expression())
+
+        token.next()
+    else:
+        raise ParseError(f"Expected '(', got '{token.get().token_type}'")
         
     return CallNode(ident, args)
 
@@ -404,7 +434,7 @@ def Program(tokens):
 
     globalContext = {}
 
-    while token:
+    while token.get():
         Statement(globalContext)
 
     return globalContext

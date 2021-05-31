@@ -1,5 +1,5 @@
 class FunctionNode:
-    def __init__(self, ident, args, body, context, parCont, patterns):
+    def __init__(self, ident, args, body, context, patterns):
         self.ident = ident              #String
         self.args = args                #[String]
         self.body = body                #BodyNode
@@ -19,29 +19,25 @@ class IONode:
 
 class BodyNode:
     def __init__(self, isGuarded,  expr, guards):
-        self.isGuarded                  #Boolean
+        self.isGuarded = isGuarded      #Boolean
         self.expr = expr                #ExpressionNode
         self.guards = guards            #GuardNode
 
 class GuardNode:
-    def __init__(self, bool_expr, asg_expr):
+    def __init__(self, boolExpr, asgExpr, isOther = False):
+        self.isotherwise = isOther      #Boolean
         self.boolExpr = boolExpr        #ExpressionNode
         self.asgExpr = asgExpr          #ExpressionNode
 
 class ExpressionNode:
-    def __init__(self, _type, valexpr, _tuple, mutable, ifThenElse, IO, chain = None):
+    def __init__(self, _type, expr):
         self.exprType = _type           #ExpressionType
-        self.valexpr = valexpr          #ValExprNode
-        self._tuple = _tuple            #Tuple
-        self.mutable = mutable          #MutableNode
-        self.ifThenElse = ifThenElse    #ConditionalNode
-        self.IO = IO                    #IONode
-        self.chain = chain              #ChainNode
+        self.expr = expr
 
 class ChainNode:
     def __init__(self, expr, nextNode):
         self.expr = expr                #ExpressionNode
-        self.nextNode = nextNode        #ExpressionNode<Evaluates to Chain>
+        self.nextNode = nextNode        #ChainNode
 
 #Only to be used in list comprehension, nowhere else.
 class Assign2Node:

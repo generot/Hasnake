@@ -12,9 +12,16 @@ def entry():
         print("Usage: python main.py <haskell_src>.hs")
         return EXIT_FAILURE
 
+    #try:
     with open(sys.argv[1], "r") as f:
         tokens = LexFile(f)
-        PrintTokens(tokens)
+        #PrintTokens(tokens)
+        symbolTable = Program(tokens)
+
+        print(symbolTable["getLine"].patterns[2].body.expr.exprType)
+    #except ParseError as err:
+    #    print(err)
+        
 
     return EXIT_SUCCESS
 
@@ -23,5 +30,3 @@ if __name__ == "__main__":
     ret_code = 0
     if ret_code := entry():
         print(f"Internal error, return code: {ret_code}")
-    else:
-        print(f"Exited normally with return code: {ret_code}")

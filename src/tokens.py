@@ -29,8 +29,6 @@ class TokenType(Enum):
     THEN = "then"
     ELSE = "else"
     OTHERWISE = "otherwise"
-    GETCHAR = "getchar"
-    PUTCHAR = "putchar"
     WHERE = "where"
     IMPORT = "import"
 #KEYWORDS
@@ -52,11 +50,19 @@ class Token:
         self.token_type = ttype
         self.strrep = ""
 
-def HandleSpecialToken(strrep):
-    if strrep.isalnum():
-        if strrep.isnumeric():
-            return TokenType.VALUE
+def IsNumeric(strrep):
+    chars = [str(x) for x in range(10)] + ["."]
 
+    for i in strrep:
+        if i not in chars:
+            return False
+
+    return True
+
+def HandleSpecialToken(strrep):
+    if IsNumeric(strrep):
+        return TokenType.VALUE
+    elif strrep.isalnum() and not strrep.isnumeric():
         return TokenType.IDENT
     else:
         if strrep.count('"') > 1:
@@ -72,5 +78,3 @@ def DetermineToken(strrep):
         return TokenType(strrep)
     except ValueError:
         return HandleSpecialToken(strrep)
-    
-
