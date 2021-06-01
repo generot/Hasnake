@@ -18,7 +18,7 @@ def entry():
         #PrintTokens(tokens)
         symbolTable = Program(tokens)
 
-        print(symbolTable["getLine"].patterns[2].body.expr.exprType)
+        print(symbolTable["chain2"].body.expr.expr.elseExpr.exprType)
     #except ParseError as err:
     #    print(err)
         

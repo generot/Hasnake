@@ -21,6 +21,24 @@ def LexSetup():
     rulesSrc.close()
     return GenerateRule(allRules)
 
+def InputOutput():
+    _type = None
+    _param = None
+
+    if CheckToken(token, TokenType.GETCHAR, TokenType.PUTCHAR):
+        if CheckToken(token, TokenType.GETCHAR):
+            _type = IOType.Stdin
+            token.next()
+        elif CheckToken(token, TokenType.PUTCHAR):
+            token.next()
+
+            _type = IOType.Stdout
+            _param = Expression()
+
+        token.next()
+        return IONode(_type, _param)
+
+    return None
 
 #reg = r"\w+|[^\s\w]?[\=\!]|\<?\-|\.{1,2}|[+\/*()|:\[\]\,\>]|\".*?\""
 #reg = r"\w+|[^\s\w]?[\=\!]|\<?\-|\.{1,2}|[|&]+|[+\/*():\[\]\,\>\<]|\".*?\""

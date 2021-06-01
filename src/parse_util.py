@@ -107,7 +107,7 @@ def GetFirstRs(*funcs):
         if res:
             return (res, i.__name__)
 
-    return None
+    return (None, None)
 
 def CheckToken(itr, *args):
     if not itr.get():

@@ -16,5 +16,5 @@ getLine 1 = (1, 2, 3)
 getLine 10 = 10 + 3
 getLine 23 = (2 + 3) * 10
 
---Chaining still breaks shit
-chain x y = <x() : y() : 3 : 4>
+chain x y = (3 : 4 : 5)
+chain2 a b = if a() > b() && a() >= 10 then (a(), 3) else (b() : a())

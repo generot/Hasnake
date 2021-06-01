@@ -138,16 +138,19 @@ def Guard():
     return GuardNode(boolExpr, asgExpr, isOther)
 
 def Expression():
-    expr = GetFirstRs(Tuple, Logical, Chain)
+    (expr, exprType) = GetFirstRs(Tuple, Chain, Conditional, Logical)
+
     if expr:
-        return ExpressionNode(ExpressionType[expr[1]], expr[0])
+        return ExpressionNode(ExpressionType[exprType], expr)
 
     return None
 
 def Chain():
     baseChain = None
 
-    if CheckToken(token, TokenType.LT):
+    if CheckToken(token, TokenType.LPAR):
+        currIx = token.ix
+
         token.next()
         expr = Expression()
     
@@ -155,15 +158,19 @@ def Chain():
             baseChain = ChainNode(expr, None)
             chain = baseChain
 
-            while not CheckToken(token, TokenType.GT):
+            while not CheckToken(token, TokenType.RPAR):
+                if not CheckToken(token, TokenType.SPLIT):
+                    raise ParseError(f"Expected ':' in chain, got {token.get().token_type} instead.")
+
                 token.next()
-                chain.nextNode = ChainNode(Expression(), None)
+                expr = Expression()
+                
+                chain.nextNode = ChainNode(expr, None)
                 chain = chain.nextNode
 
-            if not CheckToken(token, TokenType.GT):
-                raise ParseError("Expected '>' in chain, got {token.get().token_type} instead.")
-
             token.next()
+        else:
+            token.ix = currIx
 
     return baseChain
 
@@ -180,6 +187,8 @@ def Tuple():
             return None
         else:
             while not CheckToken(token, TokenType.RPAR):
+                if not CheckToken(token, TokenType.COMMA):
+                    raise ParseError(f"Expected comma in tuple, got {token.get().token_type} instead.")
                 token.next()
                 accumulatedTuple += (Expression(), )
 
@@ -266,40 +275,23 @@ def Assign2():
 
 def Conditional():
     boolExpr, thenExpr, elseExpr = None, None, None
+
     if CheckToken(token, TokenType.IF):
         token.next()
         boolExpr = Expression()
         if not CheckToken(token, TokenType.THEN):
             raise ParseError("Expected 'then' in if-then-else statement")
-
+    
+        token.next()
         thenExpr = Expression()
-        if not CheckToken(token, TokenType.THEN):
+        if not CheckToken(token, TokenType.ELSE):
             raise ParseError("Expected 'else' in if-then-else statement")
 
+        token.next()
         elseExpr = Expression()
         return ConditionalNode(boolExpr, thenExpr, elseExpr)
 
     return None
-
-def InputOutput():
-    _type = None
-    _param = None
-
-    if CheckToken(token, TokenType.GETCHAR, TokenType.PUTCHAR):
-        if CheckToken(token, TokenType.GETCHAR):
-            _type = IOType.Stdin
-            token.next()
-        elif CheckToken(token, TokenType.PUTCHAR):
-            token.next()
-
-            _type = IOType.Stdout
-            _param = Expression()
-
-        token.next()
-        return IONode(_type, _param)
-
-    return None
-
 
 def Logical():
     lbr, rbr = Comparison(), None
@@ -424,7 +416,7 @@ def Call():
 
         token.next()
     else:
-        raise ParseError(f"Expected '(', got '{token.get().token_type}'")
+        raise ParseError(f"Expected '(', got '{token.get().token_type} - {token.get().strrep}'")
         
     return CallNode(ident, args)
 
