@@ -138,7 +138,7 @@ def Guard():
     return GuardNode(boolExpr, asgExpr, isOther)
 
 def Expression():
-    (expr, exprType) = GetFirstRs(Tuple, Chain, Conditional, Logical)
+    (expr, exprType) = GetFirstRs(Tuple, Chain, Mutable, Conditional, Logical)
 
     if expr:
         return ExpressionNode(ExpressionType[exprType], expr)
@@ -205,13 +205,12 @@ def Mutable():
     mutableType, string, _list = None, None, None
     if CheckToken(token, TokenType.LITERAL, TokenType.LBPAR):
         if CheckToken(token, TokenType.LITERAL):
-            mutableType = String
+            mutableType = MutableType.String
 
-            token.next()
             string = token.get().strrep
             token.next()
         elif CheckToken(token, TokenType.LBPAR):
-            mutableType = List
+            mutableType = MutableType.List
             _list = List()
 
         return MutableNode(mutableType, string, _list)
@@ -222,45 +221,54 @@ def List():
     lsType = ListType.Empty
     seq, rng, compr = [], None, None
 
-    token.next()
-    if CheckToken(token, TokenType.RBPAR):
-        return ListNode(ListType.Empty, seq, rng, compr)
-
-    fstExpr = Expression()
-    if CheckToken(token, TokenType.COMMA):
-        lsType = ListType.Static
-        seq.append(fstExpr)
-
-        while CheckToken(token, TokenType.COMMA):
-            token.next()
-            seq.append(Expression())
-
-    elif CheckToken(token, TokenType.RANGE):
+    if CheckToken(token, TokenType.LBPAR):
         token.next()
-        rng = RangeNode(fstExpr, Expression())
-
-    elif CheckToken(token, TokenType.GUARD):
-        token.next()
-        symbols = {}
-
-        sym = Assign2()
-        symbols[sym.ident] = sym
-
-        while CheckToken(token, TokenType.COMMA):
+        if CheckToken(token, TokenType.RBPAR):
             token.next()
+            return ListNode(ListType.Empty, seq, rng, compr)
+
+        fstExpr = Expression()
+        if CheckToken(token, TokenType.COMMA):
+            lsType = ListType.Static
+            seq.append(fstExpr)
+
+            while CheckToken(token, TokenType.COMMA):
+                token.next()
+                seq.append(Expression())
+
+        elif CheckToken(token, TokenType.RANGE):
+            token.next()
+            lsType = ListType.Ranged
+            rng = RangeNode(fstExpr, Expression())
+
+        elif CheckToken(token, TokenType.GUARD):
+            token.next()
+            lsType = ListType.Comprehensive
+            
+            symbols = {}
 
             sym = Assign2()
             symbols[sym.ident] = sym
 
-    if not CheckToken(token, TokenType.RBPAR):
-        raise ParseError(f"Expected list, got '${token.get()}' instead.")
+            while CheckToken(token, TokenType.COMMA):
+                token.next()
 
-    token.next()
-    return ListNode(lsType, seq, rng, compr)
+                sym = Assign2()
+                symbols[sym.ident] = sym
+
+            compr = ComprehensionNode(fstExpr, symbols)
+
+        if not CheckToken(token, TokenType.RBPAR):
+            raise ParseError(f"Expected list, got '${token.get().token_type}' instead.")
+
+        token.next()
+        return ListNode(lsType, seq, rng, compr)
+
+    return None
 
 def Assign2():
     if not CheckToken(token, TokenType.IDENT):
-        raise ParseError(f"Expected identifier in comprehension, got '{token.get()}' instead.")
+        raise ParseError(f"Expected identifier in comprehension, got '{token.get().token_type}' instead.")
 
     ident = token.get().strrep
     token.next()
@@ -427,6 +435,7 @@ def Program(tokens):
     globalContext = {}
 
     while token.get():
+        #print(token.get().token_type)
         Statement(globalContext)
 
     return globalContext

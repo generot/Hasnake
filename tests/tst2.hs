@@ -18,3 +18,9 @@ getLine 23 = (2 + 3) * 10
 
 chain x y = (3 : 4 : 5)
 chain2 a b = if a() > b() && a() >= 10 then (a(), 3) else (b() : a())
+
+mutb a = [3, 4, 5, a()]
+mutc = [0 .. 10]
+
+multChain = (10 : 2 + 5 : [10, 11, 12])
+compr = [x() / y() | x <- [0, 1, 2], y <- [10..20]]
