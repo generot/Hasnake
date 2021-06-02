@@ -12,6 +12,10 @@ class PatternNode:
         self.args = args                #ExpressionNode
         self.body = body                #BodyNode
 
+class ReferenceNode:
+    def __init__(self, ident):
+        self.ident = ident
+
 class IONode:
     def __init__(self, _IOtp, param = None):
         self._IOtp = _IOtp              #IOType

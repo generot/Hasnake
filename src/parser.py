@@ -63,10 +63,10 @@ def Destructure(args):
                 dTuple += (token.get().strrep, )
                 token.next()
             else:
-                raise ParseError("Expected identifier when destructuring, got '{token.get()}' instead.")
+                raise ParseError(f"Expected identifier when destructuring, got '{token.get().token_type}' instead.")
 
         if not CheckToken(token, TokenType.RPAR):
-            raise ParseError(f"Expected closing parentheses, got '{token.get()} instead.")
+            raise ParseError(f"Expected closing parentheses, got '{token.get().token_type}' instead.")
 
         token.next()
 
@@ -400,8 +400,9 @@ def Value():
         token.next()
 
     elif CheckToken(token, TokenType.IDENT):
-        ntype = NodeType.FunctionCall
-        val = Call()
+        (_val, _type) = Call()
+        val = _val
+        ntype = _type
 
     elif CheckToken(token, TokenType.LPAR):
         token.next()
@@ -424,9 +425,10 @@ def Call():
 
         token.next()
     else:
-        raise ParseError(f"Expected '(', got '{token.get().token_type} - {token.get().strrep}'")
+        return (ReferenceNode(ident), NodeType.Reference)
+        #raise ParseError(f"Expected '(', got '{token.get().token_type} - {token.get().strrep}'")
         
-    return CallNode(ident, args)
+    return (CallNode(ident, args), NodeType.FunctionCall)
 
 def Program(tokens):
     global token

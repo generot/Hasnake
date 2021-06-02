@@ -18,7 +18,7 @@ def entry():
         #PrintTokens(tokens)
         symbolTable = Program(tokens)
 
-        print(symbolTable["compr"].body.expr.expr.ls.compr.symbols)
+        print(symbolTable["caller"].body.expr.expr.val.args[0].expr.node_type)
     #except ParseError as err:
     #    print(err)
         

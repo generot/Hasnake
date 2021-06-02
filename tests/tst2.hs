@@ -24,3 +24,9 @@ mutc = [0 .. 10]
 
 multChain = (10 : 2 + 5 : [10, 11, 12])
 compr = [x() / y() | x <- [0, 1, 2], y <- [10..20]]
+
+destr (x : xs) = x() + destr(xs())
+
+map lmb (x : xs) = (lmb(x()) : map(lmb() xs()))
+lambda x = x() * x()
+caller ls = map(lambda ls())
