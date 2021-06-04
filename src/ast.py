@@ -7,19 +7,13 @@ class FunctionNode:
         self.patterns = patterns        #FunctionNode
 
 class PatternNode:
-    def __init__(self, ident, args, body):
+    def __init__(self, ident, pattern):
         self.ident = ident              #String
-        self.args = args                #ExpressionNode
-        self.body = body                #BodyNode
+        self.pattern = pattern          #Dict<Tuple, BodyNode>
 
 class ReferenceNode:
     def __init__(self, ident):
         self.ident = ident
-
-class IONode:
-    def __init__(self, _IOtp, param = None):
-        self._IOtp = _IOtp              #IOType
-        self.param = param              #ExpressionNode
 
 class BodyNode:
     def __init__(self, isGuarded,  expr, guards):

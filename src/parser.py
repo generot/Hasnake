@@ -92,15 +92,19 @@ def WhereContext(parentContext):
     return True
 
 def Pattern(parentIdent):
-    args, patterns, body = [], [], None
+    patterns, body = [], None
 
     while CheckToken(token, TokenType.IDENT) and token.get().strrep == parentIdent:
+        args = tuple()
         token.next()
+
         while not CheckToken(token, TokenType.ASG):
-            args.append(Expression())
+            args += (Expression(),)
 
         body = Body()
-        patterns.append(PatternNode(parentIdent, args, body))
+        pattern = {args: body}
+
+        patterns.append(PatternNode(parentIdent, pattern))
 
     return patterns
 
@@ -253,8 +257,8 @@ def List():
             while CheckToken(token, TokenType.COMMA):
                 token.next()
 
-                sym = Assign2()
-                symbols[sym.ident] = sym
+                (symIdent, symValues) = Assign2()
+                symbols[symIdent] = symValues
 
             compr = ComprehensionNode(fstExpr, symbols)
 
@@ -279,7 +283,7 @@ def Assign2():
     token.next()
     ls = List()
 
-    return Assign2Node(ident, ls)
+    return (ident, ls)
 
 def Conditional():
     boolExpr, thenExpr, elseExpr = None, None, None
@@ -406,9 +410,9 @@ def Value():
 
     elif CheckToken(token, TokenType.LPAR):
         token.next()
-        val = Term()
+        val = Logical()
         if not CheckToken(token, TokenType.RPAR):
-            raise ParseError(f"Expected closing parentheses, got '{token.get()}' instead.")
+            raise ParseError(f"Expected closing parentheses, got '{token.get().token_type}' instead.")
 
         token.next()
 
@@ -441,3 +445,9 @@ def Program(tokens):
         Statement(globalContext)
 
     return globalContext
+
+def ExprParser(tokens):
+    global token
+    token = BetterIterator(tokens)
+
+    return Expression()
