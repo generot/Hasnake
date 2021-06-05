@@ -1,10 +1,17 @@
 class FunctionNode:
-    def __init__(self, ident, args, body, context, patterns):
+    def __init__(self, ident, args, body, context = None, patterns = None):
         self.ident = ident              #String
         self.args = args                #[String]
         self.body = body                #BodyNode
         self.context = context          #Dict<String, FunctionNode>
         self.patterns = patterns        #FunctionNode
+
+    @staticmethod
+    def From(fNode):
+        if not isinstance(fNode, FunctionNode):
+            raise TypeError("fNode should be of type 'FunctionNode'")
+
+        return FunctionNode(fNode.ident, fNode.args, fNode.body, fNode.context, fNode.patterns)
 
 class PatternNode:
     def __init__(self, ident, pattern):
@@ -55,7 +62,7 @@ class ValExprNode:
 class CallNode:
     def __init__(self, ident, args):
         self.ident = ident              #String
-        self.args = args                #ExpressionNode
+        self.args = args                #List<ExpressionNode>
 
 class ConditionalNode:
     def __init__(self, boolExpr, thenExpr, elseExpr):

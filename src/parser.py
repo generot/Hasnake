@@ -38,8 +38,12 @@ def Function(parentContext):
     if not CheckToken(token, TokenType.ASG, TokenType.GUARD):
         raise ParseError(f"Expected function declaration, got {token.get().token_type} instead.")
 
-    localContext = {x: None for x in funcArgs}
+    localContext = {x: FunctionNode(x, [], None) for x in funcArgs}
     localContext["@global@"] = parentContext
+
+    for i in localContext:
+        if i != "@global@":
+            localContext[i].context = {"@global@": localContext}
 
     body = Body()
     WhereContext(localContext)
@@ -85,7 +89,7 @@ def WhereContext(parentContext):
 
     token.next()
     while not CheckToken(token, TokenType.RBPAR):
-       func =  Function(parentContext)
+       func = Function(parentContext)
        parentContext[func.ident] = func
 
     token.next()
@@ -251,8 +255,8 @@ def List():
             
             symbols = {}
 
-            sym = Assign2()
-            symbols[sym.ident] = sym
+            (symIdent, symValues) = Assign2()
+            symbols[symIdent] = symValues
 
             while CheckToken(token, TokenType.COMMA):
                 token.next()
