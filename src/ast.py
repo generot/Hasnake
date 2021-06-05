@@ -6,6 +6,9 @@ class FunctionNode:
         self.context = context          #Dict<String, FunctionNode>
         self.patterns = patterns        #FunctionNode
 
+    def __repr__(self):
+        return f"<Function reference - Identifier: {self.ident}>"
+
     @staticmethod
     def From(fNode):
         if not isinstance(fNode, FunctionNode):
@@ -38,6 +41,9 @@ class ExpressionNode:
     def __init__(self, _type, expr):
         self.exprType = _type           #ExpressionType
         self.expr = expr
+
+    def __repr__(self):
+        return f"<Expression - Type: {self.exprType}>"
 
 class ChainNode:
     def __init__(self, expr, nextNode):

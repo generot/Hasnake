@@ -236,6 +236,10 @@ def List():
             return ListNode(ListType.Empty, seq, rng, compr)
 
         fstExpr = Expression()
+        if CheckToken(token, TokenType.RBPAR):
+            token.next()
+            return ListNode(ListType.Static, [fstExpr], None, None)
+
         if CheckToken(token, TokenType.COMMA):
             lsType = ListType.Static
             seq.append(fstExpr)

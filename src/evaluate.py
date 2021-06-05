@@ -2,15 +2,12 @@ from src.parser import ExprParser
 from src.parse_util import ListType, NodeType, MutableType, ExpressionType
 from src.tokens import TokenType
 
+from src.eval_util import *
 from src.exception import EvalError
 from src.ast import *
 
 def Switch(val, cases):
     return cases[val]()
-
-def InitEval(ast):
-    global symbolTable
-    symbolTable = ast
 
 def EvalExpr(expr, context):
     if not isinstance(expr, ExpressionNode):
@@ -65,19 +62,23 @@ def EvalChainExpr(expr, context):
 
     return finalLs
 
-def LinkFunction(expr, context):
-    funcRef = None
-
-    while expr.ident not in context and "@global@" in context:
-        context = context["@global@"]
-
-    if expr.ident in context:
-        funcRef = context[expr.ident]
-
-    return funcRef
-
 def EvalCall(expr, context):
-    fc = LinkFunction(expr, context)
+    fc = None
+    isBuiltin = False
+
+    try:
+        fc = getattr(BuiltinMethod, expr.ident)
+        isBuiltin = True
+    except:
+        fc = LinkFunction(expr, context)
+
+    if isBuiltin:
+        if fc.__code__.co_argcount != len(expr.args):
+            raise EvalError(f"Mismatching number of parameters between call and definition of built-in function '{expr.ident}'")
+
+        params = [EvalExpr(x, context) for x in expr.args]
+        return fc(*params)
+ 
 
     if not fc:
         raise EvalError(f"Reference to undefined function '{expr.ident}'")
@@ -92,28 +93,46 @@ def EvalCall(expr, context):
     stack["@global@"] = context
 
     if arglen1 and arglen2:
-        resargs = ResolveCallArgs(expr, context)
+        resargs = ResolveCallArgs(expr, context, EvalExpr)
 
         for arg, ident in zip(resargs, fc.args):
-            body = BodyNode(False, arg, None)
-            stack[ident] = FunctionNode(ident, [], body, stack, None)
+            if isinstance(ident, tuple):
+                if not isinstance(arg.expr.val, list):
+                    raise EvalError(f"Destructuring is not defined for {arg}")
+
+                rst = Restructure(arg.expr.val, len(ident))
+                for elem, _id in zip(rst, ident):
+                    val = ValExprNode(NodeType.Value, elem)
+
+                    body = BodyNode(False, ExpressionNode(ExpressionType.Logical, val), None)
+                    stack[_id] = FunctionNode(ident, [], body, stack, None)
+
+            elif isinstance(arg.expr.val, FunctionNode):
+                stack[ident] = arg.expr.val
+            else:
+                body = BodyNode(False, arg, None)
+                stack[ident] = FunctionNode(ident, [], body, stack, None)
+
+    if fc.body.isGuarded:
+        otherwise = None
+
+        for guard in fc.body.guards:
+            if not guard.isotherwise:
+                cond = EvalExpr(guard.boolExpr, stack)
+                if cond:
+                    return EvalExpr(guard.asgExpr, stack)
+            else:
+                otherwise = guard
+
+        return EvalExpr(otherwise.asgExpr, stack)
 
     return EvalExpr(fc.body.expr, stack)
-
-def ResolveCallArgs(expr, context):
-    resolvedArgs = []
-    for arg in expr.args:
-        argexpr = ValExprNode(NodeType.Value, EvalExpr(arg, context))
-        res = ExpressionNode(ExpressionType.Logical, argexpr)
-
-        resolvedArgs.append(res)
-
-    return resolvedArgs
 
 def EvalArithmExpr(expr, context):
     return Switch(expr.node_type, {
     NodeType.Value: lambda: EvalArithmExpr(expr.val) if isinstance(expr.val, ValExprNode) else expr.val,
     NodeType.FunctionCall: lambda: EvalCall(expr.val, context),
+    NodeType.Reference: lambda: LinkFunction(expr.val, context),
     NodeType.Operation: 
         lambda: Switch(expr.op, {
         TokenType.ADD: lambda: EvalArithmExpr(expr.lBranch, context) + EvalArithmExpr(expr.rBranch, context),
@@ -131,3 +150,5 @@ def EvalArithmExpr(expr, context):
         TokenType.SUB: lambda: -EvalArithmExpr(expr.lBranch, context)
         })
     })
+
+
