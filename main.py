@@ -40,10 +40,13 @@ def Interactive(symTable):
             Commands(inp)
             continue
 
-        expr = ExprParser(LexLine(inp))
-        res = EvalExpr(expr, symTable)
+        try:
+            expr = ExprParser(LexLine(inp))
+            res = EvalExpr(expr, symTable)
 
-        print(res)
+            print(res)
+        except Exception as err:
+            print(f"------EXCEPTION------\n{err}")
 
 
 def Entry():
@@ -54,9 +57,9 @@ def Entry():
 
         tokens = LexFile(fileHandle)
         symbolTable = Program(tokens)
-        
+    
+    sys.setrecursionlimit(2000)
     Interactive(symbolTable)
-    #print(symbolTable["caller"].body.expr.expr.val.args[0].expr.node_type)
         
     return EXIT_SUCCESS
 

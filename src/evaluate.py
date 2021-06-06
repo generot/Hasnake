@@ -112,7 +112,7 @@ def EvalCall(expr, context):
     arglen2 = len(expr.args)
 
     if arglen1 != arglen2:
-        raise EvalError(f"Mismatching number of arguments in function call and function declaration of function {expr.ident}")
+        raise EvalError(f"Mismatching number of arguments in function call and function declaration of function '{expr.ident}'")
 
     stack = dict(fc.context)
     stack["@global@"] = context

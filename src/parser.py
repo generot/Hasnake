@@ -322,6 +322,9 @@ def Logical():
 
     if CheckToken(token, TokenType.AND, TokenType.OR):
         token.next()
+        if not CheckToken(token, TokenType.IDENT, TokenType.VALUE, TokenType.SUB, TokenType.LPAR):
+            raise ParseError(f"Expected expression, got {token.get().token_type} instead.")
+
         rbr = Logical()
 
         return ValExprNode(NodeType.Operation, 0, oper, lbr, rbr)
@@ -339,6 +342,9 @@ def Comparison():
 
     if CheckToken(token, *comps):
         token.next()
+        if not CheckToken(token, TokenType.IDENT, TokenType.VALUE, TokenType.SUB, TokenType.LPAR):
+            raise ParseError(f"Expected expression, got {token.get().token_type} instead.")
+
         rbr = Comparison()
 
         return ValExprNode(NodeType.Operation, 0, oper, lbr, rbr)
@@ -356,6 +362,9 @@ def Term():
         if CheckToken(token, TokenType.ADD):
             token.next()
 
+        if not CheckToken(token, TokenType.IDENT, TokenType.VALUE, TokenType.SUB, TokenType.LPAR):
+            raise ParseError(f"Expected expression, got {token.get().token_type} instead.")
+
         rbr = Term()
         return ValExprNode(NodeType.Operation, 0, TokenType.ADD, lbr, rbr)
 
@@ -370,6 +379,10 @@ def Factor():
 
     if CheckToken(token, TokenType.MULT, TokenType.DIV):
         token.next()
+
+        if not CheckToken(token, TokenType.IDENT, TokenType.VALUE, TokenType.SUB, TokenType.LPAR):
+            raise ParseError(f"Expected expression, got {token.get().token_type} instead.")
+
         rbr = Factor()
         return ValExprNode(NodeType.Operation, 0, oper, lbr, rbr)
 
@@ -383,6 +396,10 @@ def Negate():
 
     if CheckToken(token, TokenType.SUB):
         token.next()
+
+        if not CheckToken(token, TokenType.IDENT, TokenType.VALUE, TokenType.SUB, TokenType.LPAR):
+            raise ParseError(f"Expected expression, got {token.get().token_type} instead.")
+
         lbr = Negate()
         return ValExprNode(NodeType.Operation, 0, oper, lbr, None)
 
@@ -398,6 +415,10 @@ def Power():
 
     if CheckToken(token, TokenType.POW):
         token.next()
+
+        if not CheckToken(token, TokenType.IDENT, TokenType.VALUE, TokenType.SUB, TokenType.LPAR):
+            raise ParseError(f"Expected expression, got {token.get().token_type} instead.")
+
         rbr = Power()
         return ValExprNode(NodeType.Operation, 0, oper, lbr, rbr)
 
@@ -432,13 +453,15 @@ def Call():
     token.next()
     if CheckToken(token, TokenType.LPAR):
         token.next()
+        if not token.get():
+            raise ParseError("Expected expression, got nothing instead")
+
         while not CheckToken(token, TokenType.RPAR):
             args.append(Expression())
 
         token.next()
     else:
         return (ReferenceNode(ident), NodeType.Reference)
-        #raise ParseError(f"Expected '(', got '{token.get().token_type} - {token.get().strrep}'")
         
     return (CallNode(ident, args), NodeType.FunctionCall)
 
@@ -449,7 +472,6 @@ def Program(tokens):
     globalContext = {}
 
     while token.get():
-        #print(token.get().token_type)
         Statement(globalContext)
 
     return globalContext
