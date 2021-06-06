@@ -50,6 +50,9 @@ class HasnakeTest(unittest.TestCase):
     def test_call_expr(self):
         self.assertEqual(LineExpr("(sq(3) + sq(4)) ^ 0.5", callHs), 5)
 
+    def test_if_expr(self):
+        self.assertEqual(LineExpr("if 5 < 10 then 5 ^ 2 else 25 ^ 0.5", None), 25)
+
 def LineExpr(strexpr, context):
     tokens = LexLine(strexpr)
     expr = ExprParser(tokens)
