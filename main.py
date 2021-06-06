@@ -1,63 +1,35 @@
-from src.lexer import *
-from src.parser import *
+from src.evaluate import Switch, EvalExpr
+from src.util import Interactive, LoadFile
 
-from src.evaluate import EvalExpr, Switch
-
+from utest import RunTest
+from unittest import TextTestRunner
 import sys
 
 #DEFINITIONS
 EXIT_SUCCESS = 0
 EXIT_FAILURE = -1
 
-def DisplayHelp():
-    print(f'{"#" * 20}\n'
-          ":q - Exit\n"
-          ":help - Open help menu\n"
-          f'{"#" * 20}\n')
-
-def Commands(inp):
-    inp = inp.strip()
-    res = Switch(inp, {
-        ":q": lambda: exit(),
-        ":help": lambda: DisplayHelp()
-    })
-
-def Interactive(symTable):
-    lmb = u"\u03BB> "
-    msg = "Hasnake v1.0 - A Haskell interpreter, written in Python(i.e. the slowest thing on the planet)"
-    hyphens = "-" * len(msg)
-    inp = None
-
-    print(f"{msg}\n{hyphens}")
-
-    while True:
-        try:
-            inp = input(lmb)
-        except:
-            return
-        
-        if inp.find(":") == 0:
-            Commands(inp)
-            continue
-
-        try:
-            expr = ExprParser(LexLine(inp))
-            res = EvalExpr(expr, symTable)
-
-            print(res)
-        except Exception as err:
-            print(f"------EXCEPTION------\n{err}")
-
-
 def Entry():
-    symbolTable = None
+    args = {"-m": None, "-utest": False}
 
     if len(sys.argv) > 1:
-        fileHandle = open(sys.argv[1], "r")
+        for i in range(len(sys.argv)):
+            args[sys.argv[i]] = Switch(sys.argv[i], {
+            "-m": lambda: LoadFile(sys.argv[i + 1]),
+            "-utest": lambda: True
+            })
 
-        tokens = LexFile(fileHandle)
-        symbolTable = Program(tokens)
-    
+    symbolTable = args["-m"]
+
+    if args["-utest"]:
+        sys.argv.pop()
+
+        suite = RunTest()
+        testRunner = TextTestRunner()
+        testRunner.run(suite)
+
+        return EXIT_SUCCESS
+
     sys.setrecursionlimit(2000)
     Interactive(symbolTable)
         

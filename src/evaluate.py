@@ -9,6 +9,9 @@ from src.ast import *
 from itertools import product
 
 def Switch(val, cases):
+    if val not in cases:
+        return None
+
     return cases[val]()
 
 def EvalExpr(expr, context):

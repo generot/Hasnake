@@ -2,6 +2,8 @@ someFunc a b = a() + b() + y() - x()
 	where [ y = a() * b() 
 		x = a() - b() ]
 
+ifTest x = if x() > 10 then "Greater than 10" else "Less than 10"
+
 func2 x y = x() * y()
 func3 x = if x() > 0 then x() + func3(x() - 1) else 0
 
@@ -22,6 +24,7 @@ chainFunc lim
 	| otherwise	= []
 
 getLambda lmb a b = lmb(a() b()) + a()
+
 head a (x : xs) = x() + a()
 
 length (x : xs)
@@ -31,6 +34,8 @@ length (x : xs)
 moreDest (x : y : xs) = x() + y()
 
 sq a = a() * a()
+
+passByRef a ref = ref(a())
 
 map lmb (x : xs)
 	| empty(xs()) == 1	= [lmb(x())]

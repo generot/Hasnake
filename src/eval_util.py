@@ -1,5 +1,6 @@
 import sys
 
+from src.exception import EvalError
 from src.parse_util import NodeType, ExpressionType
 from src.ast import *
 
@@ -16,8 +17,13 @@ class BuiltinMethod:
     def getLn():
         return input()
 
+    def mod(a, b):
+        return a % b
+
 def LinkFunction(expr, context):
     funcRef = None
+    if not context:
+        raise EvalError("No context found")
 
     while expr.ident not in context and "@global@" in context:
         context = context["@global@"]
