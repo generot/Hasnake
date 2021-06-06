@@ -7,4 +7,3 @@ While Hasnake, like Standard Haskell, is mostly a pure functional language, it s
 That means that I/O within pure functions returns results which can be used within the very same function without wrapping the impurities in a do-block. These innovations will ease the user's life marginally, since do-blocks will no longer be needed to access impure results(i.e. IOString, etc.).
 ## Documentation
 Check the 'docs' folder for a full documentation on the Hasnake language.<br>
-- [Grammar specification](https://github.com/generot/Hasnake/edit/main/docs/hasnake-grammar.html)
