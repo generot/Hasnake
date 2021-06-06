@@ -1,5 +1,5 @@
 from src.evaluate import Switch, EvalExpr
-from src.util import Interactive, LoadFile
+from src.util import Interactive, LoadFile, ListAllCmds
 
 from utest import RunTest
 from unittest import TextTestRunner
@@ -16,7 +16,8 @@ def Entry():
         for i in range(len(sys.argv)):
             args[sys.argv[i]] = Switch(sys.argv[i], {
             "-m": lambda: LoadFile(sys.argv[i + 1]),
-            "-utest": lambda: True
+            "-utest": lambda: True,
+            "-help": lambda: ListAllCmds()
             })
 
     symbolTable = args["-m"]

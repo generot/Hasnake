@@ -61,3 +61,15 @@ def LoadFile(_dir):
     fileHandle.close()
 
     return Program(tokens)
+
+def ListAllCmds():
+    dc = {
+    "-help": "Lists all command line flags",
+    "-m <dir>": "Loads a hasnake source file in the interpreter",
+    "-utest": "Runs a bunch of unit tests on the interpreter using call.hs"
+    }
+
+    for i in dc:
+        print(f"{i}: {dc[i]}")
+
+    exit()
