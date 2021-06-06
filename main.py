@@ -36,7 +36,6 @@ def Entry():
         
     return EXIT_SUCCESS
 
-#Program entry
 if __name__ == "__main__":
     ret_code = 0
     if ret_code := Entry():
