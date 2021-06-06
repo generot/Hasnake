@@ -47,18 +47,17 @@ def Interactive(symTable):
 
 
 def Entry():
-    if len(sys.argv) < 2:
-        print("Usage: python main.py <haskell_src>.hs")
-        return EXIT_FAILURE
+    symbolTable = None
 
-    with open(sys.argv[1], "r") as f:
-        tokens = LexFile(f)
+    if len(sys.argv) > 1:
+        fileHandle = open(sys.argv[1], "r")
+
+        tokens = LexFile(fileHandle)
         symbolTable = Program(tokens)
         
-        Interactive(symbolTable)
-        #print(symbolTable["caller"].body.expr.expr.val.args[0].expr.node_type)
+    Interactive(symbolTable)
+    #print(symbolTable["caller"].body.expr.expr.val.args[0].expr.node_type)
         
-
     return EXIT_SUCCESS
 
 #Program entry

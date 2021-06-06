@@ -6,6 +6,8 @@ from src.eval_util import *
 from src.exception import EvalError
 from src.ast import *
 
+from itertools import product
+
 def Switch(val, cases):
     return cases[val]()
 
@@ -35,14 +37,37 @@ def EvalConditionalExpr(expr, context):
     return EvalExpr(expr.elseExpr, context)
 
 def EvalMutableExpr(expr, context):
+    if not isinstance(expr, MutableNode):
+        raise EvalError(f"Mutable node should be passed to EvalMutableExpr().")
+
     return Switch(expr.mutype, {
     MutableType.String: lambda: expr.string.replace("\"", ""),
     MutableType.List: lambda: Switch(expr.ls.lsType, {
         ListType.Static: lambda: [EvalExpr(x, context) for x in expr.ls.seq],
         ListType.Ranged: lambda: list(range(int(EvalExpr(expr.ls.rng.begin, context)), int(EvalExpr(expr.ls.rng.end, context)) + 1)),
-        ListType.Empty: lambda: []
+        ListType.Empty: lambda: [],
+        ListType.Comprehensive: lambda: EvalComprehension(expr.ls.compr, context)
         })
     })
+
+def EvalComprehension(comp, context):
+    symbols = {i: EvalMutableExpr(MutableNode(MutableType.List, ls = comp.symbols[i]), context) for i in comp.symbols}
+
+    finalLs = []
+    combinations = list(product(*list(symbols.values())))
+
+    symbols["@global@"] = context
+    for i in combinations:
+        for ix, j in enumerate(symbols):
+            if j != "@global@":
+                val = ValExprNode(NodeType.Value, i[ix])
+                body = BodyNode(False, ExpressionNode(ExpressionType.Logical, val), None)
+                symbols[j] = FunctionNode(j, [], body, symbols)
+
+        finalLs.append(EvalExpr(comp.baseExpr, symbols))
+
+    return finalLs
+    
 
 def EvalChainExpr(expr, context):
     finalLs = []
@@ -130,7 +155,7 @@ def EvalCall(expr, context):
 
 def EvalArithmExpr(expr, context):
     return Switch(expr.node_type, {
-    NodeType.Value: lambda: EvalArithmExpr(expr.val) if isinstance(expr.val, ValExprNode) else expr.val,
+    NodeType.Value: lambda: EvalArithmExpr(expr.val, context) if isinstance(expr.val, ValExprNode) else expr.val,
     NodeType.FunctionCall: lambda: EvalCall(expr.val, context),
     NodeType.Reference: lambda: LinkFunction(expr.val, context),
     NodeType.Operation: 
