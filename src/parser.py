@@ -16,7 +16,7 @@ def Statement(parentContext):
         if not CheckToken(token, TokenType.LITERAL):
             raise ParseError("Expected string literal after 'import'.")
 
-        ImportModule(token.get().replace("\"", ""))
+        ImportModule(token.get().strrep.replace("\"", ""))
         token.next()
 
     elif CheckToken(token, TokenType.IDENT):

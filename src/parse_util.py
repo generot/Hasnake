@@ -84,7 +84,7 @@ class BetterIterator:
         for i in otherLs:
             self.ls.append(i)
 
-        self.ls = len(self.ls)
+        self.len = len(self.ls)
 
     def next(self):
         if self.ix < self.len:

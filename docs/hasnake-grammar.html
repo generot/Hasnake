@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hasnake grammar specification</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="hasnake-grammar-specification">Hasnake grammar specification</h1>
+<h2 id="importing-different-modules">Importing different modules</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">import</span> <span class="token string">"random/dir/module.hs"</span>
+</code></pre>
+<h2 id="function-declaration---single-expression">Function declaration - single expression</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">func</span> <span class="token hvariable">arg1</span> <span class="token hvariable">arg2</span> <span class="token operator">=</span> <span class="token hvariable">arg1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token hvariable">arg2</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">--Everything is a function, hence we have to call arg1 and arg2 to use their values.</span>
+</code></pre>
+<h2 id="function-declaration---guards">Function declaration - guards</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">func</span> <span class="token hvariable">arg1</span> <span class="token hvariable">arg2</span>
+	<span class="token operator">|</span> <span class="token hvariable">arg1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token hvariable">arg2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 	<span class="token operator">=</span> <span class="token string">"Arg1 &gt; Arg2"</span>
+	<span class="token operator">|</span> <span class="token builtin">otherwise</span>			<span class="token operator">=</span> <span class="token string">"Arg1 &lt;= Arg2"</span>
+<span class="token comment">--The 'otherwise' guard is evaluated if and only if the boolean expressions</span>
+<span class="token comment">--in the other guards evaluate to "false".</span>
+</code></pre>
+<h2 id="function-call">Function call</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span>	<span class="token comment">--Without arguments</span>
+<span class="token hvariable">func</span><span class="token punctuation">(</span><span class="token hvariable">arg1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token hvariable">arg2</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>	<span class="token comment">--With arguments</span>
+</code></pre>
+<h2 id="pass-by-reference">Pass by reference</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">someFunc</span> <span class="token hvariable">a</span> <span class="token hvariable">b</span> <span class="token operator">=</span> <span class="token hvariable">a</span><span class="token punctuation">(</span><span class="token hvariable">b</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token hvariable">funcByRef</span> <span class="token hvariable">arg</span> <span class="token operator">=</span> <span class="token hvariable">arg</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">^</span> <span class="token number">2</span>
+
+<span class="token hvariable">someFunc</span><span class="token punctuation">(</span><span class="token hvariable">funcByRef</span> <span class="token number">4</span><span class="token punctuation">)</span>
+<span class="token comment">--Notice how we don't use brackets when passing by reference</span>
+<span class="token comment">--That's because we only need a reference to the function, not to execute it immediately</span>
+<span class="token comment">--We then pass the second argument 'b' to 'a'(reference to 'funcByRef')</span>
+</code></pre>
+<h2 id="lists">Lists</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">staticLs</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">]</span>
+<span class="token hvariable">ranged</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">5</span> <span class="token operator">..</span> <span class="token number">10</span><span class="token punctuation">]</span>
+<span class="token hvariable">comprehensive</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token hvariable">x</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token hvariable">y</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token hvariable">x</span> <span class="token operator">&lt;-</span> <span class="token punctuation">[</span><span class="token number">0</span><span class="token operator">..</span><span class="token number">10</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token hvariable">y</span> <span class="token operator">&lt;-</span> <span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token comment">--List comprehension evaluates the given expression(in this case "x() * y()"),</span>
+<span class="token comment">--evaluates it with all possible combinations of 'x' and 'y' and returns a list with</span>
+<span class="token comment">--the results.</span>
+</code></pre>
+<h2 id="tuples">Tuples</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">tuple</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token hvariable">funcCall</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"Hey there"</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token number">12</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token comment">--Any type can be included in the same tuple.</span>
+</code></pre>
+<h2 id="strings">Strings</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token comment">--In source file</span>
+<span class="token hvariable">someStr</span> <span class="token operator">=</span> <span class="token string">"Hello, world"</span>
+
+<span class="token comment">--In interpreter</span>
+λ<span class="token operator">&gt;</span> <span class="token builtin">print</span><span class="token punctuation">(</span><span class="token hvariable">someStr</span><span class="token punctuation">)</span>
+<span class="token constant">Hello</span><span class="token punctuation">,</span> <span class="token hvariable">world</span>
+</code></pre>
+<h2 id="if---then---else-expression">If - Then - Else expression</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">smth</span> <span class="token hvariable">a</span> <span class="token hvariable">b</span> <span class="token operator">=</span> <span class="token keyword">if</span> <span class="token hvariable">a</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token hvariable">b</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">then</span> <span class="token hvariable">a</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">else</span> <span class="token hvariable">b</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">--If the expression after the 'if' is true, the 'then' block is returned.</span>
+<span class="token comment">--Otherwise, the 'else' block is returned.</span>
+</code></pre>
+<h2 id="where-blocks">Where-blocks</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">someFunc</span> <span class="token hvariable">a</span> <span class="token hvariable">b</span> <span class="token operator">=</span> <span class="token hvariable">a</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token hvariable">b</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token hvariable">y</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">where</span> <span class="token punctuation">[</span> <span class="token hvariable">y</span> <span class="token operator">=</span> <span class="token hvariable">a</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">3</span> <span class="token punctuation">]</span>
+
+<span class="token comment">--Kinda like declaring local variables(functions in our case)</span>
+</code></pre>
+<h2 id="list-destructuring">List destructuring</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token builtin">sum</span> <span class="token punctuation">(</span><span class="token hvariable">x</span> <span class="token operator">:</span> <span class="token hvariable">xs</span><span class="token punctuation">)</span>
+	<span class="token operator">|</span> <span class="token hvariable">empty</span><span class="token punctuation">(</span><span class="token hvariable">xs</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>	<span class="token operator">=</span> <span class="token punctuation">[</span><span class="token hvariable">x</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+	<span class="token operator">|</span> <span class="token builtin">otherwise</span>		<span class="token operator">=</span> <span class="token hvariable">x</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token builtin">sum</span><span class="token punctuation">(</span><span class="token hvariable">xs</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment">--The head of the list is stored in 'x'</span>
+<span class="token comment">--The tail - in 'xs'</span>
+</code></pre>
+<h2 id="chaining">Chaining</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token hvariable">chain</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">:</span> <span class="token number">2</span> <span class="token operator">:</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">4</span> <span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token hvariable">chain2</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">:</span> <span class="token number">2</span> <span class="token operator">:</span> <span class="token number">3</span> <span class="token operator">+</span> <span class="token number">4</span> <span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token comment">--A list is required to be in the chain's final position</span>
+<span class="token comment">--Can be used in recursive functions</span>
+</code></pre>
+<h2 id="built-in-functions">Built-in functions</h2>
+<pre class=" language-haskell"><code class="prism  language-haskell"><span class="token builtin">print</span><span class="token punctuation">(</span><span class="token hvariable">str</span><span class="token punctuation">)</span> <span class="token comment">--Prints a string and then returns the number of printed bytes</span>
+<span class="token hvariable">getLn</span><span class="token punctuation">(</span><span class="token punctuation">)</span>    <span class="token comment">--Reads a string from stdin and returns it</span>
+<span class="token hvariable">empty</span><span class="token punctuation">(</span><span class="token hvariable">ls</span><span class="token punctuation">)</span>  <span class="token comment">--Checks if a list is empty and returns the corresponding boolean value</span>
+<span class="token builtin">mod</span><span class="token punctuation">(</span><span class="token hvariable">n</span> <span class="token builtin">div</span><span class="token punctuation">)</span> <span class="token comment">--Performs a modulus operation(n % div)</span>
+</code></pre>
+</div>
+</body>
+
+</html>
