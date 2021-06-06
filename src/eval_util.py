@@ -18,7 +18,7 @@ class BuiltinMethod:
         return input()
 
     def mod(a, b):
-        return a % b
+        return int(a) % int(b)
 
 def LinkFunction(expr, context):
     funcRef = None

@@ -7,8 +7,8 @@ map lmb (x : xs)
 	| otherwise	= (lmb(x()) : map(lmb xs()))
 
 filter lmb (x : xs)
-	| empty(xs())	= if check(x()) then [x()] else []
-	| check(x())	= (x() : filter(lmb xs()))
+	| empty(xs())	= if lmb(x()) then [x()] else []
+	| lmb(x())	= (x() : filter(lmb xs()))
 	| otherwise	= filter(lmb xs())
 
 zip (x : xs) (y : ys)
