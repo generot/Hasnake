@@ -19,6 +19,10 @@ sum (x : xs)
 	| empty(xs())	= x()
 	| otherwise	= x() + sum(xs())
 
+concat (x : xs) ls
+	| empty(xs())	= (x() : ls())
+	| otherwise	= (x() : concat(xs() ls()))
+
 head (x : xs) = x()
 
 tail (x : xs) = xs()
