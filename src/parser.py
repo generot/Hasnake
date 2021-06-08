@@ -271,7 +271,7 @@ def List():
             compr = ComprehensionNode(fstExpr, symbols)
 
         if not CheckToken(token, TokenType.RBPAR):
-            raise ParseError(f"Expected list, got '${token.get().token_type}' instead.")
+            raise ParseError(f"Expected list, got '{token.get().token_type}' instead.")
 
         token.next()
         return ListNode(lsType, seq, rng, compr)
@@ -289,7 +289,8 @@ def Assign2():
         raise ParseError(f"Expected '<-' in comprehension")
 
     token.next()
-    ls = List()
+    #ls = List()
+    ls = Expression()
 
     return (ident, ls)
 

@@ -40,6 +40,8 @@ class TokenType(Enum):
     COMMA = ","
     LBPAR = "["
     RBPAR = "]"
+    LAMBDA = "\\"
+    ARROW = "->"
 #RESERVED SYMBOLS
 
 class Token:

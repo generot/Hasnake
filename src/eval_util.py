@@ -11,14 +11,36 @@ class BuiltinMethod:
 
     @staticmethod
     def print(_str):
-        return sys.stdout.write(_str + "\n")
+        return sys.stdout.write(_str)
+
+    @staticmethod
+    def printLn(_str):
+        if isinstance(_str, list):
+            _str = "".join(_str)
+
+        return BuiltinMethod.print(_str + "\n")
 
     @staticmethod
     def getLn():
         return input()
 
+    @staticmethod
     def mod(a, b):
         return int(a) % int(b)
+
+    @staticmethod
+    def fst(tp):
+        if not isinstance(tp, tuple) or len(tp) != 2:
+            raise EvalError("Expected tuple with 2 members.")
+
+        return tp[0]
+
+    @staticmethod
+    def snd(tp):
+        if not isinstance(tp, tuple) or len(tp) != 2:
+            raise EvalError("Expected tuple with 2 members.")
+
+        return tp[1]
 
 def LinkFunction(expr, context):
     funcRef = None

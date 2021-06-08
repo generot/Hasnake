@@ -54,8 +54,8 @@ def EvalMutableExpr(expr, context):
     })
 
 def EvalComprehension(comp, context):
-    symbols = {i: EvalMutableExpr(MutableNode(MutableType.List, ls = comp.symbols[i]), context) for i in comp.symbols}
-
+    symbols = {i: EvalExpr(comp.symbols[i], context) for i in comp.symbols}
+    
     finalLs = []
     combinations = list(product(*list(symbols.values())))
 
