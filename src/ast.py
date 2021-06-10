@@ -7,14 +7,12 @@ class FunctionNode:
         self.patterns = patterns        #FunctionNode
 
     def __repr__(self):
-        return f"<Function reference - Identifier: {self.ident}>"
+        _type = "Function"
+            
+        if not self.ident:
+            _type = "Lambda"
 
-    @staticmethod
-    def From(fNode):
-        if not isinstance(fNode, FunctionNode):
-            raise TypeError("fNode should be of type 'FunctionNode'")
-
-        return FunctionNode(fNode.ident, fNode.args, fNode.body, fNode.context, fNode.patterns)
+        return f"<{_type} reference - Identifier: {self.ident}>"
 
 class PatternNode:
     def __init__(self, ident, pattern):

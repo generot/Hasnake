@@ -16,6 +16,7 @@ class NodeType(Enum):
     Value = 1
     FunctionCall = 2
     Reference = 3
+    Lambda = 4
 
 class MutableType(Enum):
     List = 0

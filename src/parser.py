@@ -38,6 +38,8 @@ def Function(parentContext):
     if not CheckToken(token, TokenType.ASG, TokenType.GUARD):
         raise ParseError(f"Expected function declaration, got {token.get().token_type} instead.")
 
+    body = Body(funcArgs)
+
     localContext = {x: FunctionNode(x, [], None) for x in funcArgs}
     localContext["@global@"] = parentContext
 
@@ -45,7 +47,6 @@ def Function(parentContext):
         if i != "@global@":
             localContext[i].context = {"@global@": localContext}
 
-    body = Body()
     WhereContext(localContext)
 
     patterns = Pattern(funcIdent)
@@ -112,7 +113,7 @@ def Pattern(parentIdent):
 
     return patterns
 
-def Body():
+def Body(args):
     guarded, expr, guards = False, None, []
 
     if CheckToken(token, TokenType.GUARD):
@@ -124,6 +125,12 @@ def Body():
     elif CheckToken(token, TokenType.ASG):
         token.next()
         expr = Expression()
+
+    if expr and expr.exprType == ExpressionType.Logical and expr.expr.node_type == NodeType.Lambda:
+        args.clear()
+        args.extend(expr.expr.val.args)
+
+        return expr.expr.val.body
 
     return BodyNode(guarded, expr, guards)
 
@@ -440,13 +447,38 @@ def Value():
 
     elif CheckToken(token, TokenType.LPAR):
         token.next()
-        val = Logical()
+
+        if CheckToken(token, TokenType.LAMBDA):
+            ntype = NodeType.Lambda
+            val = Lambda()
+        else:
+            val = Logical()
+
         if not CheckToken(token, TokenType.RPAR):
             raise ParseError(f"Expected closing parentheses, got '{token.get().token_type}' instead.")
 
         token.next()
 
     return ValExprNode(ntype, val)
+
+def Lambda():
+    context = {}
+
+    token.next()
+    while CheckToken(token, TokenType.IDENT):
+        context[token.get().strrep] = None
+        token.next()
+    
+    if not CheckToken(token, TokenType.ARROW):
+        raise ParseError(f"Expected lambda body, got '{token.get().token_type}' instead")
+
+    args = list(context.keys())
+    context["@global@"] = None
+
+    token.next()
+    body = BodyNode(False, Expression(), None)
+
+    return FunctionNode(None, args, body, context)
 
 def Call():
     ident, args = token.get().strrep, []

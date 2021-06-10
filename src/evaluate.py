@@ -161,6 +161,7 @@ def EvalArithmExpr(expr, context):
     NodeType.Value: lambda: EvalArithmExpr(expr.val, context) if isinstance(expr.val, ValExprNode) else expr.val,
     NodeType.FunctionCall: lambda: EvalCall(expr.val, context),
     NodeType.Reference: lambda: LinkFunction(expr.val, context),
+    NodeType.Lambda: lambda: expr.val, 
     NodeType.Operation: 
         lambda: Switch(expr.op, {
         TokenType.ADD: lambda: EvalArithmExpr(expr.lBranch, context) + EvalArithmExpr(expr.rBranch, context),
