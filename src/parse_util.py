@@ -28,6 +28,8 @@ class ExpressionType(Enum):
     Mutable = 2
     Conditional = 3
     Chain = 4
+    Lambda = 5
+    Reference = 6
 
 class Operation(Enum):
     Add = '+'

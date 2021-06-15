@@ -23,6 +23,14 @@ concat (x : xs) ls
 	| empty(xs())	= (x() : ls())
 	| otherwise	= (x() : concat(xs() ls()))
 
+take am (x : xs)
+	| am() /= 0	= (x() : take(am() - 1 xs()))
+	| otherwise	= []
+
+drop am (x : xs)
+	| am() == 0	= xs()
+	| otherwise	= drop(am() - 1 xs())
+
 head (x : xs) = x()
 
 tail (x : xs) = xs()

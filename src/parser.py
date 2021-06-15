@@ -4,7 +4,12 @@ from src.exception import *
 
 from src.lexer import LexFile
 
+import sys
+from os import path
+
 def ImportModule(_dir):
+    basePath = path.dirname(path.abspath(sys.argv[0]))
+    _dir = path.join(basePath, "haslib", _dir)
     with open(_dir) as modSrc:
         modTokens = LexFile(modSrc)
         token.concat(modTokens)
@@ -126,11 +131,11 @@ def Body(args):
         token.next()
         expr = Expression()
 
-    if expr and expr.exprType == ExpressionType.Logical and expr.expr.node_type == NodeType.Lambda:
-        args.clear()
-        args.extend(expr.expr.val.args)
+    #if expr and expr.exprType == ExpressionType.Logical and expr.expr.node_type == NodeType.Lambda:
+    #    args.clear()
+    #    args.extend(expr.expr.val.args)
 
-        return expr.expr.val.body
+    #    return expr.expr.val.body
 
     return BodyNode(guarded, expr, guards)
 
@@ -296,7 +301,6 @@ def Assign2():
         raise ParseError(f"Expected '<-' in comprehension")
 
     token.next()
-    #ls = List()
     ls = Expression()
 
     return (ident, ls)

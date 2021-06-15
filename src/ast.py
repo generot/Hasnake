@@ -64,8 +64,9 @@ class ValExprNode:
         self.rBranch = rBranch          #<--^
 
 class CallNode:
-    def __init__(self, ident, args):
+    def __init__(self, ident, args, expr = None):
         self.ident = ident              #String
+        self.expr = expr                #ExpressionNode
         self.args = args                #List<ExpressionNode>
 
 class ConditionalNode:

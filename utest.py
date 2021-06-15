@@ -36,7 +36,8 @@ class HasnakeTest(unittest.TestCase):
 
     def test_builtins(self):
         self.assertEqual(LineExpr("empty([])", None), True)
-        self.assertEqual(LineExpr('print("Hello, world")', None), 13)
+        self.assertEqual(LineExpr('print("Hello, world")', None), 12)
+        self.assertEqual(LineExpr('printLn("Hello, world")', None), 13)
         self.assertEqual(LineExpr("mod(3 2)", None), 1)
 
     def test_destr(self):
