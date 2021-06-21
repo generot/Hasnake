@@ -31,6 +31,10 @@ drop am (x : xs)
 	| am() == 0	= xs()
 	| otherwise	= drop(am() - 1 xs())
 
+makeLinkedList (x : xs)
+	| empty(xs()) == 0 	= (x(), makeList(xs()))
+	| otherwise		= x()
+
 head (x : xs) = x()
 
 tail (x : xs) = xs()

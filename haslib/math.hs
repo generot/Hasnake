@@ -4,7 +4,8 @@ factorial n
 	| n() == 0	= 1
 	| otherwise	= n() * factorial(n() - 1)
 
-gaussSum n = if n() /= 0 then n() + gaussSum(n() - 1) else 0
+sum n = if n() /= 0 then n() + sum(n() - 1) else 0
+gaussSum n = n() * (n() + 1) / 2
 
 deg a = a() * 180 / PI()
 rad a = a() * PI() / 180

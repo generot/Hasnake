@@ -11,14 +11,11 @@ class BuiltinMethod:
 
     @staticmethod
     def print(_str):
-        return sys.stdout.write(_str)
+        return sys.stdout.write(str(_str))
 
     @staticmethod
     def printLn(_str):
-        if isinstance(_str, list):
-            _str = "".join(_str)
-
-        return BuiltinMethod.print(_str + "\n")
+        return BuiltinMethod.print(str(_str) + "\n")
 
     @staticmethod
     def getLn():
